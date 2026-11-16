@@ -15,6 +15,14 @@ async function signIn(formData: FormData) {
   redirect('/dashboard');
 }
 
+async function forgot(formData: FormData) {
+  'use server';
+  const email = String(formData.get('email') ?? '').trim();
+  if (email) await (await createClient()).auth.resetPasswordForEmail(email);   // o e-mail leva a /auth/confirm (template do Supabase)
+  // resposta idêntica exista ou não a conta: não revela quem é cliente
+  flash('/login', 'ok', 'Se o e-mail estiver cadastrado, enviamos as instruções para redefinir a senha.');
+}
+
 export const metadata = { title: 'Entrar' };
 
 export default function LoginPage() {
@@ -33,6 +41,7 @@ export default function LoginPage() {
           <Field label="E-mail"><input name="email" type="email" required autoComplete="email" className="input" /></Field>
           <Field label="Senha"><input name="password" type="password" required autoComplete="current-password" className="input" /></Field>
           <SubmitButton className="btn btn-primary w-full" pendingText="Entrando…">Entrar</SubmitButton>
+          <button formAction={forgot} formNoValidate className="w-full text-center text-sm text-muted underline">Esqueci a senha (informe o e-mail acima)</button>
         </form>
       </section>
     </main>

@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createAnonClient } from '@/lib/supabase/anon';
+import { visitorIp } from '@/lib/ip';
 import { ProposalView, type ProposalViewData } from '@/components/ProposalView';
 import { PrintButton } from '@/components/ClientButtons';
 import { SubmitButton } from '@/components/SubmitButton';
@@ -18,8 +19,8 @@ async function accept(token: string, fd: FormData) {
   'use server';
   if (!validToken(token)) redirect(`/p/${token}`);
   if (fd.get('agree') !== 'on') redirect(`/p/${token}?err=${encodeURIComponent('Confirme que leu e concorda com a proposta.')}`);
-  const { data, error } = await createAnonClient().rpc('proposal_public_accept', { p_token: token, p_name: String(fd.get('name') ?? ''), p_email: String(fd.get('email') ?? '') });
-  if (error) redirect(`/p/${token}?err=${encodeURIComponent(error.code === '22023' ? 'Informe nome e e-mail válidos.' : 'Não foi possível registrar o aceite.')}`);
+  const { data, error } = await createAnonClient(await visitorIp()).rpc('proposal_public_accept', { p_token: token, p_name: String(fd.get('name') ?? ''), p_email: String(fd.get('email') ?? '') });
+  if (error) redirect(`/p/${token}?err=${encodeURIComponent(error.code === '22023' ? 'Informe nome e e-mail válidos.' : error.code === 'P0429' ? 'Muitas tentativas. Aguarde alguns minutos e tente de novo.' : 'Não foi possível registrar o aceite.')}`);
   revalidatePath(`/p/${token}`);
   redirect(`/p/${token}?${data ? 'done=accepted' : 'err=' + encodeURIComponent('Esta proposta não está mais disponível para aceite.')}`);
 }
@@ -27,8 +28,8 @@ async function accept(token: string, fd: FormData) {
 async function requestChanges(token: string, fd: FormData) {
   'use server';
   if (!validToken(token)) redirect(`/p/${token}`);
-  const { data, error } = await createAnonClient().rpc('proposal_public_request_changes', { p_token: token, p_name: String(fd.get('name') ?? ''), p_message: String(fd.get('message') ?? '') });
-  if (error) redirect(`/p/${token}?err=${encodeURIComponent('Descreva as alterações desejadas.')}`);
+  const { data, error } = await createAnonClient(await visitorIp()).rpc('proposal_public_request_changes', { p_token: token, p_name: String(fd.get('name') ?? ''), p_message: String(fd.get('message') ?? '') });
+  if (error) redirect(`/p/${token}?err=${encodeURIComponent(error.code === 'P0429' ? 'Muitas tentativas. Aguarde alguns minutos e tente de novo.' : 'Descreva as alterações desejadas.')}`);
   redirect(`/p/${token}?${data ? 'done=changes' : 'err=' + encodeURIComponent('Esta proposta não está mais disponível.')}`);
 }
 
@@ -44,7 +45,7 @@ export default async function PublicProposal({ params, searchParams }: { params:
   // Robôs de pré-visualização (WhatsApp, Slack...) não contam como visualização do cliente.
   if (BOT.test(ua)) return <Shell><h1 className="text-2xl font-semibold">Proposta comercial</h1></Shell>;
 
-  const { data } = await createAnonClient().rpc('proposal_public_open', { p_token: token });
+  const { data } = await createAnonClient(await visitorIp()).rpc('proposal_public_open', { p_token: token });
   if (!data) return <Shell><h1 className="text-2xl font-semibold">Proposta não encontrada</h1><p className="mt-2 text-white/60">O link pode estar incorreto ou a proposta ainda não foi liberada.</p></Shell>;
   const p = data as ProposalViewData & { status: string; accepted_at: string | null; accepted_by_name: string | null };
   const open = ['enviada', 'visualizada', 'em_negociacao'].includes(p.status);

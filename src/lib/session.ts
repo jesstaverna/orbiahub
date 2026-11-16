@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { canAccess, type ModuleKey, type Role } from '@/lib/permissions';
+import { isPrivileged, mfaNextStep, mfaPath, mfaRequired } from '@/lib/mfa';
 
 export interface Profile {
   id: string; full_name: string; email: string | null; role: Role; client_id: string | null; active: boolean;
@@ -25,7 +26,9 @@ export const getSession = cache(async () => {
     const { data: a } = await supabase.from('agencies').select('id, name, slug, plan, status, brand').eq('id', profile.agency_id).maybeSingle();
     agency = (a as Agency | null) ?? null;
   }
-  return { user: data.user, profile: profile as Profile, agency };
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();   // lê o JWT local, sem rede
+  const mfa = mfaPath(mfaNextStep({ privileged: isPrivileged(profile), current: aal?.currentLevel ?? null, next: aal?.nextLevel ?? null, required: mfaRequired() }));
+  return { user: data.user, profile: profile as Profile, agency, mfa };
 });
 
 export function flash(path: string, kind: 'ok' | 'err', message: string): never {
@@ -37,6 +40,7 @@ export function flash(path: string, kind: 'ok' | 'err', message: string): never 
 export async function requireModule(key: ModuleKey) {
   const s = await getSession();
   if (!s) redirect('/login');
+  if (s.mfa) redirect(s.mfa);
   if (!s.profile.active || !s.agency || s.profile.role === 'cliente') redirect(s.profile.is_platform_admin && !s.agency ? '/plataforma' : '/sem-acesso');
   if (!canAccess(s.profile.role, key)) flash('/dashboard', 'err', 'Seu perfil não tem acesso a este módulo.');
   return { supabase: await createClient(), ...s, agency: s.agency };
@@ -46,6 +50,7 @@ export async function requireModule(key: ModuleKey) {
 export async function requirePlatform() {
   const s = await getSession();
   if (!s) redirect('/login');
+  if (s.mfa) redirect(s.mfa);
   if (!s.profile.active || !s.profile.is_platform_admin) redirect('/sem-acesso');
   return { supabase: await createClient(), ...s };
 }

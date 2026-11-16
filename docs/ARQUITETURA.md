@@ -78,7 +78,7 @@ Convenção para **toda** tabela nova: `agency_id not null default app.current_a
 
 | Prioridade | Escopo | Estado |
 |---|---|---|
-| **P0** Segurança e integridade | Multi-tenant + RLS por agência + integridade entre tenants + plataforma + migração/rollback testados. **Pendentes P0:** fluxo de convite/definir senha, MFA para admins, rate limit do link público, `api_smoke` + worker contra PostgREST, primeira execução do CI | ✅ núcleo / ⏳ pendentes |
+| **P0** Segurança e integridade | Multi-tenant + RLS por agência + integridade entre tenants + plataforma + migração/rollback testados. Também **feito:** convite/definir senha/esqueci a senha, MFA TOTP (obrigatório opcional por `REQUIRE_MFA_ADMIN`), limite de requisições do link público + IP real (0007). **Pendentes P0:** `api_smoke` + worker contra PostgREST, primeira execução do CI, validar convite/MFA em Supabase real | ✅ núcleo / ⏳ pendentes |
 | **P1** Núcleo operacional | Papéis configuráveis (Gestor/Head); catálogo e pacotes; contratos (modelos, cláusulas, variáveis, proposta→contrato, assinatura via provedor); projetos/demandas/aprovações/tempo; empresas e contatos no CRM; head da conta; portal do cliente; auditoria filtrável; LGPD (titular, retenção) | ⏳ próximo |
 | **P2** Crescimento | Estratégia/RevOps; anúncios (leitura Meta/Google); criador de anúncios; calendário de conteúdo; equipe e capacidade; rentabilidade; relatórios/PDF | ⏳ |
 | **P3** Escala | Integrações avançadas (RD, Clicksign/ZapSign, Asaas, Meta/Google escrita), 12 agentes de IA, cobrança do SaaS, automações | ⏳ |
@@ -101,8 +101,8 @@ Os pontos ✅ já compartilham `clients.id` e `agency_id`; nenhum dado é recada
 Gatilhos no banco enfileiram `jobs`/`notifications`; o worker (a cada 5 min) processa a fila e roda a varredura horária **sobre todas as agências ativas**, sempre no escopo da agência do registro. Retentativa com backoff 1-2-4-8 min; após 5 tentativas → `dead` (visível em `/automacoes`); jobs travados há >10 min são recuperados.
 
 ## 7. Riscos
-- **Link público**: token de 256 bits, sem rate limit ainda (P0 pendente).
-- **Identidade**: convites dependem do Supabase Auth; confirmar o fluxo em homologação.
+- **Link público**: token de 256 bits + limite por token/IP (0007). O limite por IP é “melhor esforço” (quem chama o PostgREST direto pode forjar o cabeçalho); o limite por token não é falsificável.
+- **Identidade**: convite, senha e MFA dependem do Supabase Auth e dos templates de e-mail; **ainda não validados contra um Supabase real**.
 - **Modelos jurídicos**: sempre editáveis, com aviso de revisão profissional; o sistema **não** atribui validade legal.
 - **LGPD**: definir base legal, retenção e canal do titular antes de operar com dados reais de terceiros.
 - **Custos** (confirmar nos sites oficiais): Supabase, hospedagem, domínio, provedor de assinatura, Asaas, APIs de IA.

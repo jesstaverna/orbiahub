@@ -8,7 +8,12 @@ Crie **3 projetos Supabase** (dev, homologação, produção) e 3 deploys do app
 2. Supabase → Authentication → **desativar “Allow new users to sign up”** e criar o primeiro usuário. **O primeiro usuário vira administrador da PLATAFORMA** (sem agência). Os demais entram sem agência = sem acesso a nada.
    - Entre em `/login` com esse usuário: você cai em **/plataforma**. Crie a primeira agência informando o e-mail do proprietário (que já precisa ter conta; com `SUPABASE_SERVICE_ROLE_KEY` configurada o app também envia o convite). Para ser dono da própria agência, use o seu e-mail.
    - O proprietário passa a adicionar a equipe em *Configurações → Usuários* (pelo e-mail). Cada usuário pertence a **uma** agência.
-   - ⚠️ O app **ainda não tem** a tela de “definir senha” do convite (P0 pendente em `docs/ARQUITETURA.md`). Enquanto isso crie usuários em *Authentication → Users → Add user* (com senha, *Auto Confirm*).
+   - **Convite e “Esqueci a senha”** funcionam por `/auth/confirm` → `/definir-senha`. Para isso, em Supabase → *Authentication → Email Templates* troque o link dos templates **Invite user** e **Reset password** por:
+     - Invite: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite`
+     - Reset: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery`
+     e confira *Site URL* (passo 4). Sem essa troca o link do e-mail não leva à tela de senha. Alternativa: criar o usuário em *Authentication → Users → Add user* (com senha, *Auto Confirm*).
+   - **Verificação em duas etapas (TOTP):** cada usuário pode ativar em `/seguranca`; quem ativa passa a digitar o código a cada login. Para **obrigar** administradores (da agência e da plataforma), defina `REQUIRE_MFA_ADMIN=true`. Habilite MFA/TOTP em *Authentication → Providers/Multi-Factor* se estiver desligado.
+   - **Link público de proposta:** limite de 120 aberturas e 10 aceites/pedidos por 10 min por token (e por IP). O app repassa o IP do visitante (`x-client-ip`) — necessário para o IP do aceite ser o do cliente, e não o do servidor.
 3. Definir variáveis no host: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (**somente servidor**), `CRON_SECRET`, `NEXT_PUBLIC_APP_URL`.
 4. Configurar “Site URL” e redirects do Auth para o domínio do app.
 
@@ -29,6 +34,7 @@ Verificação: `/automacoes` mostra “Última varredura”. Monitore `/api/heal
 ## 4. Segurança e LGPD — checklist
 - [x] RLS em todas as tabelas, **filtrada por agência**; `anon` sem acesso a tabelas (link público só por RPC); service role só no servidor.
 - [x] Integridade entre agências por trigger (`agency_guard`/`agency_inherit`); vínculo de agência só por funções `security definer`.
+- [x] Limite de requisições no link público (0007) e IP real do visitante na evidência de aceite.
 - [x] Auditoria (`audit_log`) das tabelas sensíveis; comprovantes em bucket privado com URL assinada de 60 s.
 - [x] Cabeçalhos de segurança (HSTS, X-Frame-Options, nosniff, Referrer-Policy).
 - [ ] **A cada nova tabela**: `agency_id` + índice, RLS por agência **e** papel, trigger `agency_guard` com as FKs, auditoria, teste em `rules.test.sql` **e** `tenant.test.sql` (checklist em `docs/ARQUITETURA.md` §3).

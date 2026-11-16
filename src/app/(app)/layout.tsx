@@ -15,6 +15,7 @@ async function signOut() { 'use server'; const s = await createClient(); await s
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const s = await getSession();
   if (!s) redirect('/login');
+  if (s.mfa) redirect(s.mfa);
   // sem agência ativa (ou suspensa) não há dados a mostrar; o administrador da plataforma vai para a área dele
   if (!s.agency) redirect(s.profile.is_platform_admin ? '/plataforma' : '/sem-acesso');
   if (!s.profile.active || s.profile.role === 'cliente') redirect('/sem-acesso');

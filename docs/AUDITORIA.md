@@ -28,7 +28,7 @@ Legenda do estado: ✅ implementada e funcional · 🟡 parcial · 🎨 apenas i
 | SaaS | Identidade visual por agência | 🟡 | Cor fixa da Muvens. | **Feito:** cor de destaque por agência (nome + cor em menu, propostas públicas), contraste automático. Falta: logo, tipografia de documentos. **T** (unit) | P1 |
 | SaaS | Papéis e permissões configuráveis | 🔧 | 6 papéis fixos em `CHECK`; matriz de permissão no código (`permissions.ts`) e nas policies. Sem "Gestor/Head" nem permissões editáveis. | Tabela de papéis/permissões por agência + funções `app.can(permission)` usadas por RLS e UI. | P1 |
 | SaaS | Auditoria | 🟡 | `audit_log` cobre perfis, clientes, serviços, leads, propostas, lançamentos, metas, agências; UI mostra só 15 linhas; sem filtros/exportação. | Tela de auditoria filtrável + exportação; cobrir novas tabelas. | P1 |
-| SaaS | Segurança de sessão | 🟡 | Sem MFA; convite por e-mail depende do fluxo de senha do Supabase (callback/definir senha **não existe** no app). ❓ | MFA para admins; rota de callback + "definir senha". | P0 |
+| SaaS | Segurança de sessão | 🟡 | **Feito:** `/auth/confirm` + `/definir-senha` (política de senha), “Esqueci a senha”, MFA TOTP (`/seguranca`, `/mfa`; obrigatório com `REQUIRE_MFA_ADMIN=true`). Lógica testada (unit); **fluxos não validados contra Supabase real** ❓ | Validar em homologação; códigos de recuperação do MFA. | P0 |
 | SaaS | LGPD | 🟡 | RLS + auditoria + bucket privado ok; faltam base legal, retenção, exportação/exclusão de titular, registro de consentimento. | Rotinas de titular + política de retenção por agência. | P1 |
 | SaaS | Cobrança/assinatura do próprio SaaS | ❌ | — | Integração de pagamento (a definir). | P3 |
 | A. Dashboard | Indicadores reais (MRR, recebido, a receber, atraso, contratado, funil, negociações) | ✅ | Números vêm de `dashboard_metrics` (RLS aplicada). **T** | — | — |
@@ -43,7 +43,7 @@ Legenda do estado: ✅ implementada e funcional · 🟡 parcial · 🎨 apenas i
 | B. CRM | Head responsável pela conta | ❌ | Só `owner_id` no lead/proposta. | `clients.head_id` + visão por head. | P1 |
 | B. CRM | Identidade visual/documentos/arquivos do cliente | ❌ | Brand Center não existe. | Storage por agência/cliente. | P1 |
 | C. Propostas | Templates, itens, desconto autorizado, totais por trigger, versões, eventos | ✅ | **T** | — | — |
-| C. Propostas | Link exclusivo, aceite/pedido de alteração, expiração | ✅ | Só por RPC (anon sem tabelas). Agora com marca da agência. **T** | Rate limit no endpoint público; rotação de token. | P0 |
+| C. Propostas | Link exclusivo, aceite/pedido de alteração, expiração | ✅ | Só por RPC (anon sem tabelas). Agora com marca da agência. **T** | **Feito (0007):** limite por token/IP, IP real do visitante (antes gravava o IP do servidor). Falta: rotação/expiração de token. **T** | P1 |
 | C. Propostas | Aprovação digital | 🟡 | Registra nome, e-mail, data, IP. **Não é assinatura certificada** e não deve ser descrita assim. | Usar assinatura eletrônica real (ver D). | P1 |
 | C. Propostas | PDF | 🟡 | "Imprimir → Salvar como PDF" do navegador. | Geração no servidor (a definir). | P2 |
 | C. Propostas | Catálogo de serviços / pacotes | ❌ | Itens são digitados a cada proposta. | `service_catalog`, `packages` por agência + preço padrão. | P1 |

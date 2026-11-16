@@ -16,7 +16,7 @@
 - **Por agência (isolado por RLS + triggers):** login e papéis (admin, comercial, financeiro, designer, tráfego, cliente) · identidade visual (nome e cor) · Dashboard com dados reais · CRM (kanban, lista, calendário, anti-duplicidade, motivo de perda, lembretes) · Clientes (visão 360°) · Propostas (modelos, itens, desconto autorizado por admin, versões, link exclusivo com a marca da agência, aceite/pedido de alteração, PDF por impressão) · Financeiro (previsto/emitido/recebido, parcelas, recorrências, inadimplência, comprovantes privados) · Metas · Fila de automações + alertas · Auditoria.
 - Tipografia: **Helvetica** (Helvetica Neue → Helvetica → Arial).
 
-**Pendente / não conectado:** contratos, projetos, portal, Brand Center, anúncios, conteúdo, IA; RD Station/Conversas, Clicksign/ZapSign, Meta/Google Ads, Asaas (dependem de contas e credenciais); tela de definir senha do convite; MFA.
+**Pendente / não conectado:** contratos, projetos, portal, Brand Center, anúncios, conteúdo, IA; RD Station/Conversas, Clicksign/ZapSign, Meta/Google Ads, Asaas (dependem de contas e credenciais); validação de convite/MFA contra Supabase real; códigos de recuperação do MFA.
 
 ## Rodando
 ```bash
@@ -36,4 +36,4 @@ npm run dev
 **Não testado:** fluxo completo no navegador contra Supabase hospedado (Auth/convite, Storage, Cron reais).
 
 ## Migrations
-`supabase/migrations/` (0001–0005 base, **0006 multi-tenant**). Rollback da 0006: `supabase/rollback/`. `supabase/setup.sql` é a concatenação para colar no SQL Editor (projeto vazio).
+`supabase/migrations/` (0001–0005 base, **0006 multi-tenant**, **0007 link público**). Rollbacks: `supabase/rollback/`. `supabase/setup.sql` é a concatenação para colar no SQL Editor (projeto vazio).
