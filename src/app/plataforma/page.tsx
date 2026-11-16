@@ -8,6 +8,7 @@ import { Flash } from '@/components/Flash';
 import { SubmitButton } from '@/components/SubmitButton';
 import { Field, PageHeader, Empty } from '@/components/ui';
 import { dateTimeBR } from '@/lib/format';
+import { Logo } from '@/components/Logo';
 
 export const metadata = { title: 'Plataforma' };
 
@@ -52,6 +53,7 @@ export default async function Plataforma() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <Suspense><Flash /></Suspense>
+      <div className="mb-8"><Logo className="h-8" /></div>
       <PageHeader title="Plataforma" subtitle="Agências e planos. Esta área não exibe dados de negócio das agências (clientes, propostas, financeiro)."
         actions={<form action={signOut}><button className="btn btn-sm">Sair ({profile.email})</button></form>} />
 

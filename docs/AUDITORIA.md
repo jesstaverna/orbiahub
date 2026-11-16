@@ -12,7 +12,7 @@
 | Código reaproveitável | **MUVENS OS** (`desktop-tutorial`): Next.js 15 + Supabase, Fase 1 implementada e com testes. Foi a base desta evolução. |
 
 **Consequência:** o orbiahub. não tinha código próprio. Esta auditoria avalia o **MUVENS OS como base** (lido por inteiro: 5 migrações, ~1.000 linhas de SQL, 2 suítes de teste SQL, app Next.js) contra a especificação do orbiahub.
-O design system/identidade do orbiahub **não foi encontrado**: ficou o do MUVENS OS (Helvetica Neue, claro/escuro, cor de destaque) com a cor de destaque virando **token por agência**. Por decisão sua, a tipografia é **Helvetica sempre** (substitui o Inter do briefing).
+A identidade do orbiahub **não estava em nenhum repositório**; depois da auditoria o brand board foi enviado e aplicado (paleta Graphite/Lilac/Pale Lilac/Off White, logos). A cor de destaque é **token por agência**. Tipografia: **Helvetica sempre**, por instrução sua — o brand board cita Inter (ver DECISOES #12–13).
 
 ## 1. Matriz de funcionalidades
 

@@ -5,6 +5,7 @@ import { Flash } from '@/components/Flash';
 import { SubmitButton } from '@/components/SubmitButton';
 import { Field } from '@/components/ui';
 import { flash } from '@/lib/session';
+import { Logo } from '@/components/Logo';
 
 async function signIn(formData: FormData) {
   'use server';
@@ -20,13 +21,14 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <Suspense><Flash /></Suspense>
-      <section className="hidden flex-col justify-between bg-black p-12 text-white lg:flex">
-        <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-lg bg-brand text-lg font-bold text-on-brand">o</span><span className="text-lg font-semibold tracking-tight">orbiahub.</span></div>
+      <section className="hidden flex-col justify-between bg-[#0B0B0F] p-12 text-white lg:flex">
+        <div className="flex items-center gap-3"><Logo inverse className="h-9" /></div>
         <div><p className="max-w-md text-4xl font-semibold leading-tight tracking-tight">Sua agência inteira. Um só lugar.</p><p className="mt-4 text-sm text-white/50">CRM, propostas, projetos, anúncios e financeiro conectados.</p></div>
         <span className="h-1.5 w-24 rounded-full bg-brand" />
       </section>
       <section className="flex items-center justify-center px-6 py-16">
         <form action={signIn} className="w-full max-w-sm space-y-5">
+          <div className="lg:hidden"><Logo className="h-8" /></div>
           <div><h1 className="h1">Entrar</h1><p className="mt-1.5 text-sm text-muted">Acesso restrito a usuários cadastrados na sua agência.</p></div>
           <Field label="E-mail"><input name="email" type="email" required autoComplete="email" className="input" /></Field>
           <Field label="Senha"><input name="password" type="password" required autoComplete="current-password" className="input" /></Field>

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Icon } from './Icon';
+import { Logo } from './Logo';
 
 export interface NavItem { key: string; label: string; href: string; icon: string; phase: number }
 
@@ -34,8 +35,7 @@ export function Sidebar({ items, userName, roleLabel, agencyName, isPlatformAdmi
 
   const brand = (
     <div className="flex items-center gap-2.5 px-6 pb-4 pt-6">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-fg text-sm font-bold text-bg">o</span>
-      <div className="min-w-0 leading-tight"><div className="text-sm font-semibold tracking-tight">orbiahub.</div><div className="truncate text-[11px] text-muted" title={agencyName}>{agencyName}</div></div>
+      <div className="min-w-0 space-y-1.5"><Logo className="h-7" /><div className="truncate text-[11px] text-muted" title={agencyName}>{agencyName}</div></div>
     </div>
   );
 
@@ -50,7 +50,7 @@ export function Sidebar({ items, userName, roleLabel, agencyName, isPlatformAdmi
   return (
     <>
       <div className="fixed inset-x-0 top-0 z-30 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3 backdrop-blur lg:hidden">
-        <span className="text-sm font-semibold tracking-tight">orbiahub. <span className="font-normal text-muted">· {agencyName}</span></span>
+        <span className="flex items-center gap-2"><Logo className="h-5" /><span className="text-xs text-muted">· {agencyName}</span></span>
         <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="btn btn-sm"><Menu className="h-4 w-4" /></button>
       </div>
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-surface lg:flex">{brand}{nav}{footer}</aside>

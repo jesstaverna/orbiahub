@@ -14,6 +14,6 @@
 | 10 | **Planos** como tabela com limites **de exemplo** | Preparar cobrança futura sem inventar preço | Trava só usuários/clientes por ora (erro 53400). |
 | 11 | **Cor da agência como token CSS** (`--brand`, `--on-brand`) com contraste automático | "Identidade visual da agência" sem recompilar; texto legível em qualquer cor | Valida `#RRGGBB` (sem CSS arbitrário vindo do banco). Logo/tipografia: pendente. |
 | 12 | **Tipografia: Helvetica sempre** (Helvetica Neue → Helvetica → Arial) | Decisão do dono do produto (substitui Inter do briefing) | Já era a fonte do Tailwind; mantida. |
-| 13 | **Cor de destaque padrão = a do MUVENS OS** (provisória) | O design system do orbiahub não foi encontrado | Substituir por tokens oficiais quando fornecidos. |
+| 13 | **Paleta e logos oficiais do orbiahub.** aplicados: Graphite `#0B0B0F`, Lilac `#7C5CFF` (destaque padrão), Pale Lilac `#EDE6FF`, Off White `#FAFAFD`; logos em `public/brand` | Brand board enviado pelo dono do produto | O brand board cita **Inter**; prevalece a instrução explícita **“Helvetica sempre”** (decisão 12). Se quiser Inter, é trocar `fontFamily` em `tailwind.config.ts`. |
 | 14 | **Rollback gerado das definições originais** | Evita erro de digitação ao reverter | Teste em CI: migrar→reverter→suíte original verde. Aborta se >1 agência. |
 | 15 | **Aceite de proposta ≠ assinatura certificada** | Não inventar validade legal | Texto/UX devem manter "registro de aceite"; assinatura real só via provedor (P1/P3). |

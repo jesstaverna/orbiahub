@@ -102,7 +102,7 @@ export default async function Config() {
         <p className="mb-5 text-sm text-muted">Nome e cor de destaque aparecem no menu, nos documentos e nas propostas enviadas aos seus clientes. Plano e status são gerenciados pela plataforma.</p>
         <form action={saveAgency} className="grid items-end gap-3 sm:grid-cols-[1fr_12rem_auto]">
           <Field label="Nome da agência"><input name="name" required defaultValue={agency.name} className="input" /></Field>
-          <Field label="Cor de destaque" hint="Formato #RRGGBB. Vazio = padrão orbiahub."><input name="primary" defaultValue={agency.brand?.primary ?? ''} placeholder="#DCEA1E" pattern="#[0-9a-fA-F]{6}" className="input" /></Field>
+          <Field label="Cor de destaque" hint="Formato #RRGGBB. Vazio = padrão orbiahub."><input name="primary" defaultValue={agency.brand?.primary ?? ''} placeholder="#7C5CFF" pattern="#[0-9a-fA-F]{6}" className="input" /></Field>
           <SubmitButton className="btn btn-sm btn-dark" pendingText="…">Salvar</SubmitButton>
         </form>
         <dl className="mt-5 grid gap-3 border-t border-line pt-4 text-sm sm:grid-cols-3">
