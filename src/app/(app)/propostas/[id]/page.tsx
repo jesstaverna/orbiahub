@@ -7,7 +7,7 @@ import { CopyButton } from '@/components/ClientButtons';
 import { dateTimeBR, money } from '@/lib/format';
 import { PROPOSAL_STATUS, proposalTotals } from '@/lib/domain';
 import { normalizeContent } from '@/lib/proposal-templates';
-import { activateProposal, deleteItem, duplicateProposal, saveItem, saveProposal, sendProposal, setProposalStatus } from '../actions';
+import { activateProposal, addFromCatalog, deleteItem, duplicateProposal, saveItem, saveProposal, sendProposal, setProposalStatus } from '../actions';
 
 const EVENT: Record<string, string> = { enviada: 'Enviada', visualizada: 'Visualizada pelo cliente', alteracao_solicitada: 'Alteração solicitada', aceita: 'Aceite registrado', recusada: 'Recusada', expirada: 'Expirada', status_alterado: 'Status alterado', ativada: 'Ativada', nota: 'Nota' };
 
@@ -18,6 +18,10 @@ export default async function PropostaPage({ params }: { params: Promise<{ id: s
   const canEdit = can('proposals.write');
   const canActivate = can('finance.access');
 
+  const useCatalog = canEdit && can('catalog.read');
+  const [{ data: catServices }, { data: catPackages }] = useCatalog
+    ? await Promise.all([supabase.from('service_catalog').select('id, name, billing, unit_price').eq('active', true).order('name'), supabase.from('packages').select('id, name').eq('active', true).order('name')])
+    : [{ data: null }, { data: null }];
   const [{ data: p }, { data: items }, { data: events }, { data: versions }] = await Promise.all([
     supabase.from('proposals').select('*').eq('id', id).maybeSingle(),
     supabase.from('proposal_items').select('*').eq('proposal_id', id).order('position').order('description'),
@@ -76,6 +80,13 @@ export default async function PropostaPage({ params }: { params: Promise<{ id: s
                 {canEdit && <div className="flex gap-1.5 sm:flex-col"><SubmitButton className="btn btn-sm" pendingText="…">Salvar</SubmitButton><button formAction={deleteItem.bind(null, id, i.id)} className="btn btn-sm text-danger" formNoValidate>Excluir</button></div>}
               </form>))}
               {!items?.length && <p className="text-sm text-muted">Nenhum item. Adicione os serviços abaixo.</p>}</div>
+            {useCatalog && (!!catServices?.length || !!catPackages?.length) && (
+              <form action={addFromCatalog.bind(null, id)} className="mt-5 grid items-end gap-2 border-t border-line pt-5 sm:grid-cols-[1fr_1fr_5rem_auto]">
+                <Field label="Serviço do catálogo"><select name="service" defaultValue="" className="input"><option value="">—</option>{catServices?.map((s) => <option key={s.id} value={s.id}>{s.name} · {s.billing === 'mensal' ? 'mensal' : 'pontual'}{Number(s.unit_price) ? ` · ${money(s.unit_price)}` : ' · sob consulta'}</option>)}</select></Field>
+                <Field label="…ou pacote"><select name="package" defaultValue="" className="input"><option value="">—</option>{catPackages?.map((k) => <option key={k.id} value={k.id}>{k.name}</option>)}</select></Field>
+                <Field label="Qtd. (serviço)"><input name="quantity" type="number" min="0.01" step="0.01" defaultValue="1" className="input" /></Field>
+                <SubmitButton className="btn btn-sm btn-dark" pendingText="…">Incluir</SubmitButton>
+              </form>)}
             {canEdit && <form action={saveItem.bind(null, id, null)} className="mt-5 grid gap-2 border-t border-line pt-5 sm:grid-cols-[1fr_8rem_5rem_8rem_auto]">
               <input name="description" required placeholder="Novo serviço" className="input" aria-label="Novo serviço" /><select name="billing" className="input" aria-label="Cobrança"><option value="pontual">Pontual</option><option value="mensal">Mensal</option></select>
               <input name="quantity" type="number" min="0.01" step="0.01" defaultValue="1" className="input" aria-label="Quantidade" /><input name="unit_price" inputMode="decimal" required placeholder="Valor (R$)" className="input" aria-label="Valor" /><SubmitButton className="btn btn-sm btn-dark" pendingText="…">Adicionar</SubmitButton></form>}

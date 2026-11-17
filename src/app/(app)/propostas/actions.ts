@@ -7,7 +7,7 @@ import { templateByKey } from '@/lib/proposal-templates';
 const lines = (v: FormDataEntryValue | null) => String(v ?? '').split('\n').map((s) => s.trim()).filter(Boolean);
 const money = (v: FormDataEntryValue | null) => Number(String(v ?? '0').replace(/\./g, '').replace(',', '.')) || 0;
 const dbMsg = (code?: string, fallback = 'Não foi possível concluir a operação.') =>
-  code === '42501' ? 'Seu perfil não tem permissão para esta ação (descontos exigem administrador).' : code === '23514' ? 'Valor inválido (ex.: desconto maior que o total).' : fallback;
+  code === '42501' ? 'Seu perfil não tem permissão para esta ação (descontos exigem a permissão de desconto).' : code === '23514' ? 'Valor inválido (ex.: desconto maior que o total).' : fallback;
 
 export async function createProposal(fd: FormData) {
   const { supabase, profile } = await requireModule('propostas');
@@ -73,6 +73,19 @@ export async function saveItem(id: string, itemId: string | null, fd: FormData) 
   if (error) flash(back, 'err', 'Não foi possível salvar o item.');
   revalidatePath(back);
   flash(back, 'ok', itemId ? 'Item atualizado.' : 'Item adicionado.');
+}
+
+/** Inclui um serviço ou pacote do catálogo (cópia dos dados: mudar o catálogo depois não altera a proposta). */
+export async function addFromCatalog(id: string, fd: FormData) {
+  const { supabase } = await requireModule('propostas');
+  const back = `/propostas/${id}`;
+  const service = String(fd.get('service') ?? '') || null;
+  const pkg = String(fd.get('package') ?? '') || null;
+  const quantity = Number(fd.get('quantity') ?? 1) || 1;
+  const { data, error } = await supabase.rpc('proposal_add_from_catalog', { p_proposal: id, p_service: service, p_package: pkg, p_quantity: quantity });
+  if (error) flash(back, 'err', error.code === '22023' ? 'Escolha um serviço ou um pacote.' : error.code === '23514' ? 'Serviço ou pacote inativo, vazio ou inexistente.' : 'Não foi possível incluir do catálogo.');
+  revalidatePath(back);
+  flash(back, 'ok', `${data} item(ns) incluído(s) do catálogo. Confira quantidades e valores.`);
 }
 
 export async function deleteItem(id: string, itemId: string) {

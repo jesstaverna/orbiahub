@@ -1,10 +1,12 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { LOCKED_ROLES, MODULES, PERMISSION_KEYS, SYSTEM_ROLES, canAccess } from './permissions';
 
 describe('permissões', () => {
   it('o catálogo do app é idêntico ao do banco (app.all_permissions na migração 0008)', () => {
-    const sql = readFileSync('supabase/migrations/20261116000008_roles_permissions.sql', 'utf8');
+    // a definição vigente é a da migração mais recente que (re)define app.all_permissions
+    const files = readdirSync('supabase/migrations').filter((f) => readFileSync(`supabase/migrations/${f}`, 'utf8').includes('function app.all_permissions')).sort();
+    const sql = readFileSync(`supabase/migrations/${files.at(-1)}`, 'utf8');
     const block = sql.slice(sql.indexOf('select array['), sql.indexOf(']', sql.indexOf('select array[')));
     const db = [...block.matchAll(/'([a-z.]+)'/g)].map((m) => m[1]);
     expect([...db].sort()).toEqual([...PERMISSION_KEYS].sort());

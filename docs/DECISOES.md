@@ -18,4 +18,5 @@
 | 14 | **Rollback gerado das definições originais** | Evita erro de digitação ao reverter | Teste em CI: migrar→reverter→suíte original verde. Aborta se >1 agência. |
 | 16 | **Permissões, não papéis, decidem tudo** (`app.can`) | Papéis fixos não atendem agências de tamanhos diferentes | Papéis de sistema reproduzem exatamente o comportamento anterior (suíte original passa sem alteração); `admin`/`cliente` fixos impedem lockout. |
 | 17 | **Catálogo de permissões duplicado (SQL + TS) com teste de paridade** | O menu precisa conhecer as permissões; o banco é a fonte da verdade | Teste falha se divergirem; módulo novo = novo código nos dois lados. |
+| 18 | **Item de proposta = cópia do catálogo** (`service_id` só registra a origem) | Proposta enviada é documento: alterar preço no catálogo não pode mudar o que o cliente viu/aceitou | Excluir serviço mantém o item (FK `set null`); serviço dentro de pacote não é apagável (desative). |
 | 15 | **Aceite de proposta ≠ assinatura certificada** | Não inventar validade legal | Texto/UX devem manter "registro de aceite"; assinatura real só via provedor (P1/P3). |

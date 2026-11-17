@@ -17,6 +17,8 @@ export const PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: 'proposals.read', label: 'Ver propostas', group: 'Comercial' },
   { key: 'proposals.write', label: 'Criar e editar propostas', group: 'Comercial' },
   { key: 'proposals.discount', label: 'Autorizar desconto em propostas', group: 'Comercial' },
+  { key: 'catalog.read', label: 'Ver catálogo de serviços e pacotes', group: 'Comercial' },
+  { key: 'catalog.manage', label: 'Gerenciar catálogo (serviços, preços, pacotes)', group: 'Comercial' },
   { key: 'finance.access', label: 'Financeiro: lançamentos, recorrências, ativar proposta', group: 'Financeiro' },
   { key: 'goals.read', label: 'Ver metas e resultados', group: 'Financeiro' },
   { key: 'goals.manage', label: 'Definir metas', group: 'Financeiro' },
@@ -31,7 +33,7 @@ export const PERMISSIONS: { key: string; label: string; group: string }[] = [
 export const PERMISSION_KEYS = PERMISSIONS.map((p) => p.key);
 
 export type ModuleKey =
-  | 'dashboard' | 'crm' | 'atendimento-ia' | 'propostas' | 'contratos' | 'clientes' | 'brand' | 'projetos'
+  | 'dashboard' | 'crm' | 'catalogo' | 'atendimento-ia' | 'propostas' | 'contratos' | 'clientes' | 'brand' | 'projetos'
   | 'calendario' | 'trafego' | 'financeiro' | 'metas' | 'relatorios' | 'ia' | 'portal' | 'automacoes' | 'configuracoes';
 
 export interface ModuleDef {
@@ -55,6 +57,7 @@ export const MODULES: ModuleDef[] = [
   { key: 'propostas', label: 'Propostas Comerciais', href: '/propostas', permission: 'proposals.read', phase: 1, icon: 'file-text', summary: 'Propostas online com link exclusivo e aceite.' },
   { key: 'contratos', label: 'Contratos', href: '/contratos', permission: 'proposals.read', phase: 2, icon: 'file-signature', summary: 'Contratos gerados a partir das propostas aceitas.',
     planned: ['Modelos por serviço com preenchimento automático', 'Rascunho com revisão humana obrigatória', 'Assinatura via Clicksign/ZapSign (integração pendente)', 'Alertas de vencimento, renovação e reajuste'] },
+  { key: 'catalogo', label: 'Catálogo de Serviços', href: '/catalogo', permission: 'catalog.read', phase: 1, icon: 'package', summary: 'Serviços, preços e pacotes que alimentam as propostas.' },
   { key: 'clientes', label: 'Clientes', href: '/clientes', permission: 'clients.read', phase: 1, icon: 'users', summary: 'Cadastro e visão 360° de cada cliente.' },
   { key: 'brand', label: 'Brand Center / KV', href: '/brand', permission: 'brand.access', phase: 2, icon: 'palette', summary: 'Biblioteca de identidade visual por cliente.',
     planned: ['Logos, paletas, tipografias, KV, brandbooks', 'Armazenamento privado com download autorizado', 'Regras de design e tom de voz (base de conhecimento para a IA)'] },

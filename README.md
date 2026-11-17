@@ -13,7 +13,7 @@
 
 ## O que existe
 - **Plataforma:** agências, planos com limites, administrador da plataforma (`/plataforma`) sem acesso aos dados de negócio; suspensão de agência.
-- **Por agência (isolado por RLS + triggers):** login e **perfis com permissões configuráveis** (Administrador, Gestor/Head, Comercial, Financeiro, Designer, Tráfego, Cliente + perfis próprios) · identidade visual (nome e cor) · Dashboard com dados reais · CRM (kanban, lista, calendário, anti-duplicidade, motivo de perda, lembretes) · Clientes (visão 360°) · Propostas (modelos, itens, desconto autorizado por admin, versões, link exclusivo com a marca da agência, aceite/pedido de alteração, PDF por impressão) · Financeiro (previsto/emitido/recebido, parcelas, recorrências, inadimplência, comprovantes privados) · Metas · Fila de automações + alertas · Auditoria.
+- **Por agência (isolado por RLS + triggers):** login e **perfis com permissões configuráveis** (Administrador, Gestor/Head, Comercial, Financeiro, Designer, Tráfego, Cliente + perfis próprios) · identidade visual (nome e cor) · Dashboard com dados reais · CRM (kanban, lista, calendário, anti-duplicidade, motivo de perda, lembretes) · Clientes (visão 360°) · Catálogo de serviços e pacotes · Propostas (modelos, itens do catálogo, desconto autorizado por admin, versões, link exclusivo com a marca da agência, aceite/pedido de alteração, PDF por impressão) · Financeiro (previsto/emitido/recebido, parcelas, recorrências, inadimplência, comprovantes privados) · Metas · Fila de automações + alertas · Auditoria.
 - Tipografia: **Helvetica** (Helvetica Neue → Helvetica → Arial).
 
 **Pendente / não conectado:** contratos, projetos, portal, Brand Center, anúncios, conteúdo, IA; RD Station/Conversas, Clicksign/ZapSign, Meta/Google Ads, Asaas (dependem de contas e credenciais); validação de convite/MFA contra Supabase real; códigos de recuperação do MFA.
@@ -36,4 +36,4 @@ npm run dev
 **Não testado:** fluxo completo no navegador contra Supabase hospedado (Auth/convite, Storage, Cron reais).
 
 ## Migrations
-`supabase/migrations/` (0001–0005 base, **0006 multi-tenant**, **0007 link público**, **0008 papéis e permissões**). Rollbacks: `supabase/rollback/`. `supabase/setup.sql` é a concatenação para colar no SQL Editor (projeto vazio).
+`supabase/migrations/` (0001–0005 base, **0006 multi-tenant**, **0007 link público**, **0008 papéis e permissões**, **0009 catálogo**). Rollbacks: `supabase/rollback/`. `supabase/setup.sql` é a concatenação para colar no SQL Editor (projeto vazio).
