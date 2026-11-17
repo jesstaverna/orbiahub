@@ -7,7 +7,7 @@ import { PROPOSAL_STATUS } from '@/lib/domain';
 export const metadata = { title: 'Propostas' };
 
 export default async function Propostas({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
-  const { supabase, profile } = await requireModule('propostas');
+  const { supabase, can } = await requireModule('propostas');
   const { status = '', q = '' } = await searchParams;
   const term = q.replace(/[%,()]/g, ' ').trim();
   let query = supabase.from('proposals').select('id, number, title, client_display_name, status, total_value, valid_until, sent_at, view_count, first_viewed_at').order('number', { ascending: false }).limit(300);
@@ -16,7 +16,7 @@ export default async function Propostas({ searchParams }: { searchParams: Promis
   const { data } = await query;
   const all = data ?? [];
   const open = all.filter((p) => ['enviada', 'visualizada', 'em_negociacao'].includes(p.status));
-  const canCreate = profile.role === 'admin' || profile.role === 'comercial';
+  const canCreate = can('proposals.write');
 
   return (
     <>

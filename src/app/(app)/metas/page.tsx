@@ -34,7 +34,7 @@ type M = Record<string, number>;
 const pick = (m: M, basis: Basis) => Number(basis === 'contratado' ? m.contracted : basis === 'emitido' ? m.issued : m.received);
 
 export default async function Metas() {
-  const { supabase, profile } = await requireModule('metas');
+  const { supabase, can } = await requireModule('metas');
   const today = todayBR();
   const [y, mo] = today.split('-').map(Number);
   const cur = monthRange(y, mo), year = { from: `${y}-01-01`, to: `${y}-12-31` };
@@ -48,7 +48,7 @@ export default async function Metas() {
   const gMonth = goals?.find((g) => g.period_type === 'mensal' && g.period_start === cur.from);
   const gYear = goals?.find((g) => g.period_type === 'anual' && g.period_start === year.from);
   const c = (mCur ?? {}) as M, a = (mYear ?? {}) as M, cv = (conv ?? {}) as M;
-  const seeFinance = profile.role === 'admin' || profile.role === 'financeiro';
+  const seeFinance = can('finance.access');
 
   const monthProg = gMonth && goalProgress({ target: Number(gMonth.revenue_target), basis: gMonth.basis as Basis, actual: pick(c, gMonth.basis as Basis), pendingReceivables: Number(c.pending_in_period), weightedPipeline: Number(c.pipeline_weighted), elapsedFraction: elapsedFraction(cur.from, cur.to, today) });
   const yearProg = gYear && goalProgress({ target: Number(gYear.revenue_target), basis: gYear.basis as Basis, actual: pick(a, gYear.basis as Basis), pendingReceivables: Number(a.pending_in_period), weightedPipeline: Number(a.pipeline_weighted), elapsedFraction: elapsedFraction(year.from, year.to, today) });
@@ -57,7 +57,7 @@ export default async function Metas() {
   const Card = ({ title, goal, prog, m }: { title: string; goal?: (typeof goals extends (infer U)[] | null ? U : never); prog: ReturnType<typeof goalProgress> | undefined | null; m: M }) => (
     <section className="card">
       <h2 className="text-base font-semibold">{title}</h2>
-      {!goal || !prog ? <p className="mt-4 text-sm text-muted">Nenhuma meta definida. {profile.role === 'admin' ? 'Use o formulário ao lado.' : 'Peça a um administrador.'}</p> : (
+      {!goal || !prog ? <p className="mt-4 text-sm text-muted">Nenhuma meta definida. {can('goals.manage') ? 'Use o formulário ao lado.' : 'Peça a quem gerencia as metas.'}</p> : (
         <>
           <div className="mt-4 flex items-end justify-between"><span className="text-4xl font-semibold">{pct(prog.percent)}</span><span className="text-sm text-muted">{money(pick(m, goal.basis as Basis))} / {money(goal.revenue_target)}</span></div>
           <div className="my-3"><ProgressBar value={prog.percent} tone={prog.atRisk ? 'danger' : 'brand'} /></div>
@@ -89,7 +89,7 @@ export default async function Metas() {
           <section className="card"><h2 className="mb-4 text-base font-semibold">Metas cadastradas em {y}</h2>
             {!goals?.length ? <Empty title="Sem metas" /> : <table className="w-full text-sm"><tbody>{[...goals].sort((x, z) => x.period_start.localeCompare(z.period_start)).map((g) => <tr key={g.id} className="border-b border-line last:border-0"><td className="py-2">{g.period_type === 'anual' ? `Ano ${g.period_start.slice(0, 4)}` : `${MONTHS[Number(g.period_start.slice(5, 7)) - 1]}/${g.period_start.slice(0, 4)}`}</td><td className="py-2 text-muted">{g.basis}</td><td className="py-2 text-right">{money(g.revenue_target)}</td></tr>)}</tbody></table>}</section>
         </div>
-        {profile.role === 'admin' && (
+        {can('goals.manage') && (
           <form action={saveGoal} className="card h-fit space-y-4"><h2 className="text-base font-semibold">Definir / alterar meta</h2>
             <Field label="Tipo"><select name="period_type" className="input"><option value="mensal">Mensal</option><option value="anual">Anual</option></select></Field>
             <Field label="Período" hint="Mensal: escolha o mês. Anual: vale o ano do mês escolhido."><input type="month" name="period" required defaultValue={`${y}-${String(mo).padStart(2, '0')}`} className="input" /></Field>

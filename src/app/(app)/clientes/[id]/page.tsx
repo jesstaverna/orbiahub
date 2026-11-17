@@ -12,11 +12,10 @@ export default async function ClientePage({ params, searchParams }: { params: Pr
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const tab = (await searchParams).tab ?? 'geral';
-  const { supabase, profile } = await requireModule('clientes');
-  const role = profile.role;
-  const canEdit = ['admin', 'comercial', 'financeiro'].includes(role);
-  const seeFin = role === 'admin' || role === 'financeiro';
-  const seeSales = ['admin', 'comercial', 'financeiro'].includes(role);
+  const { supabase, can } = await requireModule('clientes');
+  const canEdit = can('clients.write');
+  const seeFin = can('finance.access');
+  const seeSales = can('clientservices.read');
 
   const { data: client } = await supabase.from('clients').select('*').eq('id', id).maybeSingle();
   if (!client) notFound();

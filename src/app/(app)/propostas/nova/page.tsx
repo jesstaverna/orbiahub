@@ -7,8 +7,8 @@ import { createProposal } from '../actions';
 export const metadata = { title: 'Nova proposta' };
 
 export default async function NovaProposta({ searchParams }: { searchParams: Promise<{ lead?: string }> }) {
-  const { supabase, profile } = await requireModule('propostas');
-  if (profile.role === 'financeiro') return <p className="text-sm text-muted">Seu perfil pode consultar propostas, mas não criá-las.</p>;
+  const { supabase, can } = await requireModule('propostas');
+  if (!can('proposals.write')) return <p className="text-sm text-muted">Seu perfil pode consultar propostas, mas não criá-las.</p>;
   const { lead } = await searchParams;
   const [{ data: leads }, { data: clients }] = await Promise.all([
     supabase.from('leads').select('id, name, company').order('created_at', { ascending: false }).limit(300),

@@ -9,6 +9,7 @@ export function mfaNextStep(o: { privileged: boolean; current: string | null; ne
   return null;
 }
 
-export const isPrivileged = (p: { role: string; is_platform_admin: boolean }) => p.role === 'admin' || p.is_platform_admin;
+/** Privilegiado = gerencia a agência (permissão settings.manage) ou é admin da plataforma. */
+export const isPrivileged = (p: { canManage: boolean; is_platform_admin: boolean }) => p.canManage || p.is_platform_admin;
 export const mfaRequired = () => process.env.REQUIRE_MFA_ADMIN === 'true';
 export const mfaPath = (step: MfaStep) => (step === 'challenge' ? '/mfa' : step === 'enroll' ? '/seguranca?obrigatorio=1' : null);

@@ -12,7 +12,7 @@ type SP = { m?: string; from?: string; to?: string; client?: string };
 const isDate = (s?: string) => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<SP> }) {
-  const { supabase, profile } = await requireModule('dashboard');
+  const { supabase, can } = await requireModule('dashboard');
   const sp = await searchParams;
   const today = todayBR();
   const [ty, tm] = today.split('-').map(Number);
@@ -27,8 +27,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   }
   const clientId = sp.client && /^[0-9a-f-]{36}$/.test(sp.client) ? sp.client : null;
 
-  const seeFinance = profile.role === 'admin' || profile.role === 'financeiro';
-  const seeSales = profile.role === 'admin' || profile.role === 'comercial';
+  const seeFinance = can('finance.access');
+  const seeSales = can('crm.access');
 
   const [{ data: metrics, error }, { data: clients }, { data: series }, { data: goal }, { data: alerts }] = await Promise.all([
     supabase.rpc('dashboard_metrics', { p_from: from, p_to: to, p_client: clientId }),

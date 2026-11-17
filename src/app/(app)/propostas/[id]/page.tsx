@@ -14,9 +14,9 @@ const EVENT: Record<string, string> = { enviada: 'Enviada', visualizada: 'Visual
 export default async function PropostaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
-  const { supabase, profile } = await requireModule('propostas');
-  const canEdit = profile.role === 'admin' || profile.role === 'comercial';
-  const canActivate = profile.role === 'admin' || profile.role === 'financeiro';
+  const { supabase, can } = await requireModule('propostas');
+  const canEdit = can('proposals.write');
+  const canActivate = can('finance.access');
 
   const [{ data: p }, { data: items }, { data: events }, { data: versions }] = await Promise.all([
     supabase.from('proposals').select('*').eq('id', id).maybeSingle(),
@@ -94,7 +94,7 @@ export default async function PropostaPage({ params }: { params: Promise<{ id: s
                 <Field label="Validade até"><input type="date" name="valid_until" defaultValue={p.valid_until ?? ''} className="input" /></Field>
                 <Field label="Vigência (meses)" hint="Multiplica a mensalidade no total."><input type="number" name="contract_months" min={1} max={120} defaultValue={p.contract_months} className="input" /></Field>
                 <Field label="Parcelas do valor pontual"><input type="number" name="installments" min={1} max={60} defaultValue={p.installments} className="input" /></Field>
-                <Field label="Desconto (R$)" hint="Somente administradores podem aplicar; fica registrado quem autorizou."><input name="discount_value" inputMode="decimal" defaultValue={Number(p.discount_value) ? String(p.discount_value).replace('.', ',') : ''} disabled={profile.role !== 'admin'} className="input" /></Field></div>
+                <Field label="Desconto (R$)" hint="Somente quem tem a permissão de desconto pode aplicar; fica registrado quem autorizou."><input name="discount_value" inputMode="decimal" defaultValue={Number(p.discount_value) ? String(p.discount_value).replace('.', ',') : ''} disabled={!can('proposals.discount')} className="input" /></Field></div>
               <Field label="Apresentação (opcional — há um texto padrão)"><textarea name="intro" rows={3} defaultValue={c.intro} className="input" /></Field>
               <Field label="Contexto e diagnóstico"><textarea name="diagnostico" rows={4} defaultValue={c.diagnostico} className="input" /></Field>
               <Field label="Objetivos (um por linha)"><textarea name="objetivos" rows={3} defaultValue={c.objetivos.join('\n')} className="input" /></Field>

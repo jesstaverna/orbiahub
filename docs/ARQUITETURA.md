@@ -31,7 +31,7 @@ Garantias **no banco** (não dependem da UI):
 5. **Worker** (service role) sempre grava/notifica na agência do registro.
 6. **Storage** — policy exige que a pasta raiz do objeto seja a agência do usuário.
 
-Papéis atuais: `admin` (proprietário/administrador da agência), `comercial`, `financeiro`, `designer`, `trafego`, `cliente`. "Gestor/Head" e permissões configuráveis: P1 (§4).
+**Papéis e permissões (0008):** `profiles.role` é a chave de um papel da tabela `roles` da própria agência (FK composta); cada papel é uma lista de permissões (`app.all_permissions()`, 20 códigos). RLS e funções testam `app.can('…')`. Papéis de sistema: `admin` (tudo, fixo), `gestor` (Head), `comercial`, `financeiro`, `designer`, `trafego`, `cliente` (nada, fixo) — com padrões **editáveis**; agências criam papéis próprios. Limitação: alertas por “audience” ainda usam a chave do papel de sistema.
 
 ## 2. Mapa de módulos × estado
 
@@ -69,7 +69,7 @@ Convenção para **toda** tabela nova: `agency_id not null default app.current_a
 | **Rentabilidade (K)** | views `profitability_by_client/project` | `fin_transactions` × `time_entries` × `contracts` | distinguir **contratado / previsto / recebido / vencido** (já no dashboard) |
 | **Portal (L)** | `portal_visibility` (o que cada cliente vê), reuso de projetos/aprovações/arquivos | `profiles.client_id` | **a agência controla item a item**; nada interno é exposto (views dedicadas, não as tabelas) |
 | **IA (M)** | `ai_agents`, `ai_conversations`, `ai_runs`, `ai_actions` (rascunhos pendentes) | chamadas no servidor com o JWT do usuário (herda RLS) | **ações críticas/externas viram rascunho com confirmação humana**; log de cada execução |
-| **Papéis (SaaS)** | `roles`, `role_permissions`, `app.can(perm)` | substitui `CHECK` de papéis e `permissions.ts` | permissões por agência, aplicadas em RLS e UI |
+| **Papéis (SaaS)** ✅ | `roles` (0008), `app.can(perm)` | substitui `CHECK` de papéis e a matriz de `permissions.ts` | permissões por agência, aplicadas em RLS e UI; novas tabelas/módulos adicionam códigos em `app.all_permissions()` e em `permissions.ts` (teste de paridade) |
 
 ### Rotas planejadas
 `/contratos[/novo|/[id]]`, `/catalogo`, `/projetos[/[id]]`, `/calendario`, `/estrategia/[clienteId]`, `/trafego`, `/anuncios`, `/conteudo`, `/equipe`, `/relatorios`, `/portal/*` (layout próprio, sem sidebar interna), `/ia`.
@@ -79,7 +79,7 @@ Convenção para **toda** tabela nova: `agency_id not null default app.current_a
 | Prioridade | Escopo | Estado |
 |---|---|---|
 | **P0** Segurança e integridade | Multi-tenant + RLS por agência + integridade entre tenants + plataforma + migração/rollback testados. Também **feito:** convite/definir senha/esqueci a senha, MFA TOTP (obrigatório opcional por `REQUIRE_MFA_ADMIN`), limite de requisições do link público + IP real (0007). **Pendentes P0:** `api_smoke` + worker contra PostgREST, primeira execução do CI, validar convite/MFA em Supabase real | ✅ núcleo / ⏳ pendentes |
-| **P1** Núcleo operacional | Papéis configuráveis (Gestor/Head); catálogo e pacotes; contratos (modelos, cláusulas, variáveis, proposta→contrato, assinatura via provedor); projetos/demandas/aprovações/tempo; empresas e contatos no CRM; head da conta; portal do cliente; auditoria filtrável; LGPD (titular, retenção) | ⏳ próximo |
+| **P1** Núcleo operacional | ✅ Papéis configuráveis (Gestor/Head); ⏳ catálogo e pacotes; contratos (modelos, cláusulas, variáveis, proposta→contrato, assinatura via provedor); projetos/demandas/aprovações/tempo; empresas e contatos no CRM; head da conta; portal do cliente; auditoria filtrável; LGPD (titular, retenção) | ⏳ próximo |
 | **P2** Crescimento | Estratégia/RevOps; anúncios (leitura Meta/Google); criador de anúncios; calendário de conteúdo; equipe e capacidade; rentabilidade; relatórios/PDF | ⏳ |
 | **P3** Escala | Integrações avançadas (RD, Clicksign/ZapSign, Asaas, Meta/Google escrita), 12 agentes de IA, cobrança do SaaS, automações | ⏳ |
 

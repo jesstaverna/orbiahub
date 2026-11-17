@@ -1,11 +1,11 @@
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { canAccess, type ModuleKey, type Role } from '@/lib/permissions';
+import { canAccess, type ModuleKey } from '@/lib/permissions';
 import { isPrivileged, mfaNextStep, mfaPath, mfaRequired } from '@/lib/mfa';
 
 export interface Profile {
-  id: string; full_name: string; email: string | null; role: Role; client_id: string | null; active: boolean;
+  id: string; full_name: string; email: string | null; role: string; client_id: string | null; active: boolean;
   agency_id: string | null; is_platform_admin: boolean;
 }
 export interface Agency { id: string; name: string; slug: string; plan: string; status: string; brand: { primary?: string } }
@@ -26,9 +26,15 @@ export const getSession = cache(async () => {
     const { data: a } = await supabase.from('agencies').select('id, name, slug, plan, status, brand').eq('id', profile.agency_id).maybeSingle();
     agency = (a as Agency | null) ?? null;
   }
+  // papel → permissões (tabela roles da agência; a RLS só mostra os da própria agência)
+  let permissions: string[] = []; let roleName = profile.role;
+  if (profile.agency_id && agency) {
+    const { data: r } = await supabase.from('roles').select('name, permissions').eq('agency_id', profile.agency_id).eq('key', profile.role).maybeSingle();
+    permissions = (r?.permissions as string[] | undefined) ?? []; roleName = r?.name ?? roleName;
+  }
   const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();   // lê o JWT local, sem rede
-  const mfa = mfaPath(mfaNextStep({ privileged: isPrivileged(profile), current: aal?.currentLevel ?? null, next: aal?.nextLevel ?? null, required: mfaRequired() }));
-  return { user: data.user, profile: profile as Profile, agency, mfa };
+  const mfa = mfaPath(mfaNextStep({ privileged: isPrivileged({ canManage: permissions.includes('settings.manage'), is_platform_admin: profile.is_platform_admin }), current: aal?.currentLevel ?? null, next: aal?.nextLevel ?? null, required: mfaRequired() }));
+  return { user: data.user, profile: profile as Profile, agency, mfa, permissions, roleName };
 });
 
 export function flash(path: string, kind: 'ok' | 'err', message: string): never {
@@ -41,9 +47,10 @@ export async function requireModule(key: ModuleKey) {
   const s = await getSession();
   if (!s) redirect('/login');
   if (s.mfa) redirect(s.mfa);
-  if (!s.profile.active || !s.agency || s.profile.role === 'cliente') redirect(s.profile.is_platform_admin && !s.agency ? '/plataforma' : '/sem-acesso');
-  if (!canAccess(s.profile.role, key)) flash('/dashboard', 'err', 'Seu perfil não tem acesso a este módulo.');
-  return { supabase: await createClient(), ...s, agency: s.agency };
+  if (!s.profile.active || !s.agency || !s.permissions.includes('app.access')) redirect(s.profile.is_platform_admin && !s.agency ? '/plataforma' : '/sem-acesso');
+  if (!canAccess(s.permissions, key)) flash('/dashboard', 'err', 'Seu perfil não tem acesso a este módulo.');
+  const permissions = s.permissions;
+  return { supabase: await createClient(), ...s, agency: s.agency, can: (permission: string) => permissions.includes(permission) };
 }
 
 /** Área da plataforma (gestão de agências e planos). Não dá acesso a dados de negócio das agências. */

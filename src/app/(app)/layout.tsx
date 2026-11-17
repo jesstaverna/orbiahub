@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/session';
-import { MODULES, ROLE_LABEL } from '@/lib/permissions';
+import { MODULES } from '@/lib/permissions';
 import { Sidebar } from '@/components/Sidebar';
 import { Flash } from '@/components/Flash';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -18,16 +18,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (s.mfa) redirect(s.mfa);
   // sem agência ativa (ou suspensa) não há dados a mostrar; o administrador da plataforma vai para a área dele
   if (!s.agency) redirect(s.profile.is_platform_admin ? '/plataforma' : '/sem-acesso');
-  if (!s.profile.active || s.profile.role === 'cliente') redirect('/sem-acesso');
+  if (!s.profile.active || !s.permissions.includes('app.access')) redirect('/sem-acesso');
 
-  const items = MODULES.filter((m) => m.roles.includes(s.profile.role)).map(({ key, label, href, icon, phase }) => ({ key, label, href, icon, phase }));
+  const items = MODULES.filter((m) => s.permissions.includes(m.permission)).map(({ key, label, href, icon, phase }) => ({ key, label, href, icon, phase }));
   const supabase = await createClient();
   const { count } = await supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null);
 
   return (
     <div className="min-h-screen" style={brandVars(s.agency.brand?.primary) as React.CSSProperties | undefined}>
       <Suspense><Flash /></Suspense>
-      <Sidebar items={items} userName={s.profile.full_name || s.profile.email || 'Usuário'} roleLabel={ROLE_LABEL[s.profile.role]} agencyName={s.agency.name} isPlatformAdmin={s.profile.is_platform_admin} signOut={signOut} />
+      <Sidebar items={items} userName={s.profile.full_name || s.profile.email || 'Usuário'} roleLabel={s.roleName} agencyName={s.agency.name} isPlatformAdmin={s.profile.is_platform_admin} signOut={signOut} />
       <div className="lg:pl-64">
         <div className="flex items-center justify-end gap-2 px-6 pt-5 max-lg:hidden lg:px-10">
           <Link href="/alertas" className="btn btn-sm relative" aria-label={`Alertas${count ? `: ${count} não lidos` : ''}`}>

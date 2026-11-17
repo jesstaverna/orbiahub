@@ -7,20 +7,20 @@ export const metadata = { title: 'Clientes' };
 const TONE: Record<string, string> = { ativo: 'bg-brand/40', pausado: 'bg-amber-500/15 text-warn', encerrado: 'bg-subtle text-muted' };
 
 export default async function Clientes({ searchParams }: { searchParams: Promise<{ q?: string; status?: string }> }) {
-  const { supabase, profile } = await requireModule('clientes');
+  const { supabase, can } = await requireModule('clientes');
   const { q = '', status = '' } = await searchParams;
   const term = q.replace(/[%,()]/g, ' ').trim();
   let query = supabase.from('clients').select('id, name, segment, status, email, phone').order('name').limit(300);
   if (term) query = query.or(`name.ilike.%${term}%,legal_name.ilike.%${term}%,email.ilike.%${term}%`);
   if (['ativo', 'pausado', 'encerrado'].includes(status)) query = query.eq('status', status);
-  const seeMoney = ['admin', 'comercial', 'financeiro'].includes(profile.role);
+  const seeMoney = can('clientservices.read');
   const [{ data: clients }, { data: services }] = await Promise.all([
     query,
     seeMoney ? supabase.from('client_services').select('client_id, value').eq('billing', 'mensal').eq('status', 'ativo') : Promise.resolve({ data: [] as { client_id: string; value: number }[] }),
   ]);
   const mrr = new Map<string, number>();
   services?.forEach((s) => mrr.set(s.client_id, (mrr.get(s.client_id) ?? 0) + Number(s.value)));
-  const canCreate = ['admin', 'comercial', 'financeiro'].includes(profile.role);
+  const canCreate = can('clients.write');
 
   return (
     <>
