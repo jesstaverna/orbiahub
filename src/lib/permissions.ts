@@ -59,7 +59,7 @@ export const MODULES: ModuleDef[] = [
     planned: ['Modelos por serviço com preenchimento automático', 'Rascunho com revisão humana obrigatória', 'Assinatura via Clicksign/ZapSign (integração pendente)', 'Alertas de vencimento, renovação e reajuste'] },
   { key: 'catalogo', label: 'Catálogo de Serviços', href: '/catalogo', permission: 'catalog.read', phase: 1, icon: 'package', summary: 'Serviços, preços e pacotes que alimentam as propostas.' },
   { key: 'clientes', label: 'Clientes', href: '/clientes', permission: 'clients.read', phase: 1, icon: 'users', summary: 'Cadastro e visão 360° de cada cliente.' },
-  { key: 'brand', label: 'Brand Center / KV', href: '/brand', permission: 'brand.access', phase: 2, icon: 'palette', summary: 'Biblioteca de identidade visual por cliente.',
+  { key: 'brand', label: 'Marcas / Brand Center', href: '/brand', permission: 'brand.access', phase: 2, icon: 'palette', summary: 'Gestão de múltiplas marcas e identidade visual por cliente.',
     planned: ['Logos, paletas, tipografias, KV, brandbooks', 'Armazenamento privado com download autorizado', 'Regras de design e tom de voz (base de conhecimento para a IA)'] },
   { key: 'projetos', label: 'Projetos e Tarefas', href: '/projetos', permission: 'app.access', phase: 2, icon: 'list-checks', summary: 'Kanban, lista e controle de entregáveis.',
     planned: ['Tarefas com checklist, arquivos, comentários e horas', 'Controle de entregáveis contratados (ex.: 12 posts/mês)', 'Fluxo de aprovação e escopo extra'] },
