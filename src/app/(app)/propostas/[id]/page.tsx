@@ -61,7 +61,7 @@ export default async function PropostaPage({ params }: { params: Promise<{ id: s
       {p.status === 'aceita' && (
         <div className="card mb-6 border-brand bg-brand/10">
           <h2 className="text-base font-semibold">Proposta aceita — próximos passos</h2>
-          <p className="mt-1 text-sm text-muted">O módulo de Contratos (assinatura eletrônica) chega na Fase 2 <Pending>pendente</Pending>. Enquanto isso, é possível ativar o cliente e gerar os recebíveis previstos no Financeiro.</p>
+          <p className="mt-1 text-sm text-muted">Gere o <b>contrato (rascunho para revisão)</b> a partir desta proposta{can('contracts.write') ? <> — <Link className="underline" href={`/contratos/novo?proposal=${id}`}>Gerar contrato</Link></> : ''}. A assinatura eletrônica depende de integração <Pending>pendente</Pending>. Também é possível ativar o cliente e gerar os recebíveis previstos no Financeiro.</p>
           {p.activated_at ? <p className="mt-3 text-sm">Ativada em {dateTimeBR(p.activated_at)}. {p.client_id && <Link className="underline" href={`/clientes/${p.client_id}`}>Ver cliente</Link>}</p>
             : canActivate ? <form action={activateProposal.bind(null, id)} className="mt-4 flex flex-wrap items-end gap-3"><Field label="Primeiro vencimento"><input type="date" name="first_due" required className="input w-48" /></Field><SubmitButton pendingText="Gerando…" confirm="Gerar cliente ativo, serviços e recebíveis previstos?">Ativar cliente e gerar financeiro</SubmitButton></form>
             : <p className="mt-3 text-sm text-muted">Aguardando o financeiro/administrador ativar.</p>}

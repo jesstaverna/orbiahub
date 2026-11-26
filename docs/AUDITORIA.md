@@ -32,7 +32,8 @@ Legenda do estado: ✅ implementada e funcional · 🟡 parcial · 🎨 apenas i
 | SaaS | LGPD | 🟡 | RLS + auditoria + bucket privado ok; faltam base legal, retenção, exportação/exclusão de titular, registro de consentimento. | Rotinas de titular + política de retenção por agência. | P1 |
 | SaaS | Cobrança/assinatura do próprio SaaS | ❌ | — | Integração de pagamento (a definir). | P3 |
 | A. Dashboard | Indicadores reais (MRR, recebido, a receber, atraso, contratado, funil, negociações) | ✅ | Números vêm de `dashboard_metrics` (RLS aplicada). **T** | — | — |
-| A. Dashboard | Projetos, demandas atrasadas, aprovações, capacidade, contratos a vencer, anúncios | ❌ | Dependem de módulos inexistentes. | Entram com cada módulo. | P1–P2 |
+| A. Dashboard | Contratos a vencer | ✅ (agora) | — | Cartão “Contratos a vencer (30 dias)”. | — |
+| A. Dashboard | Projetos, demandas atrasadas, aprovações, capacidade, anúncios | ❌ | Dependem de módulos inexistentes. | Entram com cada módulo. | P1–P2 |
 | A. Dashboard | Alertas inteligentes | 🟡 | 5 varreduras (atraso, lead parado, proposta parada, lembretes, expiração) **T**; sem alertas de projeto/campanha/contrato. | Novas varreduras por módulo. | P1 |
 | B. CRM | Pipeline configurável (etapas, probabilidade) | ✅ | Edita em Configurações. **L** | — | — |
 | B. CRM | Leads: kanban, lista, calendário, anti-duplicidade, motivo de perda, lembretes, histórico | ✅ | Regras no banco. **T** | — | — |
@@ -48,8 +49,10 @@ Legenda do estado: ✅ implementada e funcional · 🟡 parcial · 🎨 apenas i
 | C. Propostas | PDF | 🟡 | "Imprimir → Salvar como PDF" do navegador. | Geração no servidor (a definir). | P2 |
 | C. Propostas | Catálogo de serviços / pacotes | ✅ (agora) | Itens eram digitados a cada proposta. | **Feito (0009):** `service_catalog`, `packages`, `package_items`; página `/catalogo`; “Incluir do catálogo” no editor (`proposal_add_from_catalog`); o item guarda **cópia** (preço do catálogo mudar não altera proposta). Nenhum preço pré-cadastrado. **T** | P1 |
 | C. Propostas | Editor visual | 🎨 | Formulário com seções; sem editor visual. | Evoluir após catálogo. | P2 |
-| C. Propostas | Proposta aceita → contrato | ❌ | Gera cliente/serviços/recebíveis (`activate_proposal` **T**), mas contrato não existe; job `proposal.accepted` é handler vazio. | Handler cria rascunho de contrato. | P1 |
-| D. Contratos | Tudo (modelos, cláusulas, variáveis, vigência, renovação, assinatura, alertas) | ❌ | Rota `/contratos` é página "não implementado". | Módulo novo (ver ARQUITETURA §3). **Assinatura depende de provedor e credenciais.** Modelos jurídicos sempre editáveis e com aviso de revisão profissional. | P1 |
+| C. Propostas | Proposta aceita → contrato | ✅ (agora) | Gerava cliente/serviços/recebíveis, mas contrato não existia. | **Feito (0010):** “Gerar contrato” na proposta aceita → rascunho com cliente, serviços, valores e prazos. Geração é **por ação humana** (escolha do modelo), não automática. **T** | P1 |
+| D. Contratos | Modelos por serviço, biblioteca de cláusulas, variáveis, geração, versões, histórico, vigência/renovação, alertas, impressão/PDF | ✅ (agora) | Era página “não implementado”. | **Feito (0010):** 8 modelos-base (social, tráfego, branding, site, LP, design, consultoria, geral) e 20 cláusulas **editáveis**, 22 variáveis; fluxo rascunho → revisão → aprovação → assinatura registrada → encerrado; **aprovação bloqueada com `[CAMPO A PREENCHER]` ou variável sem resolver**; conteúdo trava após aprovação; renovar/encerrar/cancelar com motivo; alertas de vencimento; PDF por impressão. **T** | P1 |
+| D. Contratos | Assinatura eletrônica | ❌ (pendente externo) | Sem provedor/credenciais. | O sistema **não assina**: só registra “assinado fora do sistema” com evidência (rótulo explícito). Campos `signature_provider/ref` reservados; só service role pode gravar `provider`. Integração Clicksign/ZapSign = P3. | P3 |
+| D. Contratos | Associação contrato → projetos | ❌ | Módulo de projetos não existe; job `contract.signed` já é enfileirado (handler vazio). | Handler cria projetos/entregáveis quando E existir. | P1 |
 | E. Projetos | Projetos, tarefas, kanban, calendário, tempo, aprovações, briefings | ❌ | Rotas são páginas "não implementado". | Módulo novo (ver ARQUITETURA §3). | P1 |
 | E. Projetos | Atraso interno × atraso do cliente | ❌ | — | Campo `blocked_by` (agência/cliente) e SLA por etapa. | P1 |
 | F. Estratégia/RevOps | Hub por cliente, campanhas, funil, calendário estratégico | ❌ | — | Módulo novo. | P2 |

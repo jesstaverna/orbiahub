@@ -29,6 +29,11 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   const seeFinance = can('finance.access');
   const seeSales = can('crm.access');
+  // contratos assinados com vigência terminando em até 30 dias (ou já vencida e ainda não encerrada)
+  const limit = new Date(Date.parse(`${today}T00:00:00Z`) + 30 * 86_400_000).toISOString().slice(0, 10);
+  const { count: expiringContracts } = can('contracts.read')
+    ? await supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('status', 'assinado').not('end_date', 'is', null).lte('end_date', limit)
+    : { count: null };
 
   const [{ data: metrics, error }, { data: clients }, { data: series }, { data: goal }, { data: alerts }] = await Promise.all([
     supabase.rpc('dashboard_metrics', { p_from: from, p_to: to, p_client: clientId }),
@@ -125,6 +130,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <Stat label="Contratos fechados" value={n('contracts_closed')} hint="Propostas aceitas no período" />
           <Stat label="Pipeline ponderado" value={moneyCompact(n('pipeline_weighted'))} hint="Potencial × probabilidade da etapa" />
         </>}
+        {can('contracts.read') && <Stat label="Contratos a vencer (30 dias)" value={expiringContracts ?? 0} hint="Assinados com vigência terminando ou vencida" tone={expiringContracts ? 'danger' : undefined} href="/contratos?status=assinado" />}
         <div className="card"><div className="text-xs font-medium uppercase tracking-wider text-muted">Projetos em andamento</div><div className="mt-3"><Pending>Fase 2</Pending></div></div>
         <div className="card"><div className="text-xs font-medium uppercase tracking-wider text-muted">Tarefas atrasadas</div><div className="mt-3"><Pending>Fase 2</Pending></div></div>
       </section>
