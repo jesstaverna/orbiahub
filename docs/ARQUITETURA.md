@@ -40,7 +40,7 @@ Garantias **no banco** (não dependem da UI):
 | A. Dashboard executivo | `/dashboard`, `/alertas` | 🟡 dados reais; faltam projetos/contratos/anúncios/capacidade |
 | B. CRM e clientes | `/crm`, `/clientes` | 🟡 funil completo; falta empresas/contatos, head da conta, arquivos |
 | C. Propostas | `/propostas`, `/p/[token]`, `/catalogo` | 🟡 catálogo e pacotes ✅ (0009); PDF por impressão |
-| D. Contratos | `/contratos` | ❌ |
+| D. Contratos | `/contratos`, `/contratos/modelos` | ✅ núcleo (0010); ❌ assinatura por provedor (P3) |
 | E. Projetos e demandas | `/projetos`, `/calendario` | ❌ |
 | F. Estratégia / RevOps | — | ❌ |
 | G. Gestão de anúncios | `/trafego` | ❌ (depende de credenciais) |
@@ -79,7 +79,7 @@ Convenção para **toda** tabela nova: `agency_id not null default app.current_a
 | Prioridade | Escopo | Estado |
 |---|---|---|
 | **P0** Segurança e integridade | Multi-tenant + RLS por agência + integridade entre tenants + plataforma + migração/rollback testados. Também **feito:** convite/definir senha/esqueci a senha, MFA TOTP (obrigatório opcional por `REQUIRE_MFA_ADMIN`), limite de requisições do link público + IP real (0007). **Pendentes P0:** `api_smoke` + worker contra PostgREST, primeira execução do CI, validar convite/MFA em Supabase real | ✅ núcleo / ⏳ pendentes |
-| **P1** Núcleo operacional | ✅ Papéis configuráveis (Gestor/Head); ✅ catálogo e pacotes; contratos (modelos, cláusulas, variáveis, proposta→contrato, assinatura via provedor); projetos/demandas/aprovações/tempo; empresas e contatos no CRM; head da conta; portal do cliente; auditoria filtrável; LGPD (titular, retenção) | ⏳ próximo |
+| **P1** Núcleo operacional | ✅ Papéis configuráveis (Gestor/Head); ✅ catálogo e pacotes; ✅ contratos (modelos, cláusulas, variáveis, proposta→contrato, revisão humana; assinatura via provedor = P3); projetos/demandas/aprovações/tempo; empresas e contatos no CRM; head da conta; portal do cliente; auditoria filtrável; LGPD (titular, retenção) | ⏳ próximo |
 | **P2** Crescimento | Estratégia/RevOps; anúncios (leitura Meta/Google); criador de anúncios; calendário de conteúdo; equipe e capacidade; rentabilidade; relatórios/PDF | ⏳ |
 | **P3** Escala | Integrações avançadas (RD, Clicksign/ZapSign, Asaas, Meta/Google escrita), 12 agentes de IA, cobrança do SaaS, automações | ⏳ |
 
